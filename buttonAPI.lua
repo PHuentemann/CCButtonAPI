@@ -11,6 +11,7 @@ function initMonitor()
         shell.exit()
     else
         mon.setBackgroundColor(colors.black)
+        mon.setTextScale(1)
         mon.clear()
         sizeX, sizeY = mon.getSize() -- 4x3 = 39w 19h || 2x2 = 18w 12h
         buttonWidth = (sizeX - 5) / 2
