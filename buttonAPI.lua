@@ -14,7 +14,6 @@ function initMonitor(mon, textScale)
         mon.clear()
         sizeX, sizeY = mon.getSize() -- 4x3 = 39w 19h || 2x2 = 18w 12h @textScale=1
         buttonWidth = (sizeX - 5) / 2
-        
         for i=0,10 do
             rows[i] = 2 + (buttonHeight * i) + i -- 2+buttonHeight+1 -- 2+buttonHeight*2+2
         end
@@ -24,7 +23,7 @@ function initMonitor(mon, textScale)
     end
 end
 
-function drawButton(mon, x, y, width, height, text, func, active, guiOnly)
+function drawButton(mon, x, y, width, height, text, active)
     local spaces = 0
     local newText = text
     local textLength = string.len(text)
@@ -53,38 +52,35 @@ function drawButton(mon, x, y, width, height, text, func, active, guiOnly)
         mon.write(newText)
     end
     mon.setBackgroundColor(currentBackgroundColor)
-    buttonDict[text] = {x, x+width, y, y+height, width, height, func, active}
-    if not guiOnly then
-        func(active)
-    end
+    buttonDict[text] = {x, x+width, y, y+height, width, height, active}
 end
 
-function toggleButton(mon, button, state, guiOnly)
+function toggleButton(mon, button, state)
     local tempDict = buttonDict
-    for name, values in pairs(tempDict) do
-        local xStart, xEnd, yStart, yEnd, width, height, func, active = values[1], values[2], values[3], values[4], values[5], values[6], values[7], values[8]
-        if name == button then
-            drawButton(mon, xStart, yStart, width, height, name, func, state, guiOnly)
+    for text, values in pairs(tempDict) do
+        local xStart, xEnd, yStart, yEnd, width, height, active = values[1], values[2], values[3], values[4], values[5], values[6], values[7]
+        if text == button then
+            drawButton(mon, xStart, yStart, width, height, text, state)
         end
     end
 end
 
 function handleTouchEvent(mon, x, y)
     local tempDict = buttonDict
-    for name, values in pairs(tempDict) do
-        local xStart, xEnd, yStart, yEnd, width, height, func, active = values[1], values[2], values[3], values[4], values[5], values[6], values[7], values[8]
+    for text, values in pairs(tempDict) do
+        local xStart, xEnd, yStart, yEnd, width, height, active = values[1], values[2], values[3], values[4], values[5], values[6], values[7]
         if (x >= xStart) and (x <= xEnd) and (y >= yStart) and (y <= yEnd) then
-            drawButton(mon, xStart, yStart, width, height, name, func, not active)
+            drawButton(mon, xStart, yStart, width, height, text, not active)
         end
     end
 end
 
 function getButtonAtPos(x, y)
     local tempDict = buttonDict
-    for name, values in pairs(tempDict) do
-        local xStart, xEnd, yStart, yEnd, width, height, func, state = values[1], values[2], values[3], values[4], values[5], values[6], values[7], values[8]
+    for text, values in pairs(tempDict) do
+        local xStart, xEnd, yStart, yEnd, width, height, state = values[1], values[2], values[3], values[4], values[5], values[6], values[7]
         if (x >= xStart) and (x <= xEnd) and (y >= yStart) and (y <= yEnd) then
-            return name, func, state
+            return text, state
         end
     end
 end
