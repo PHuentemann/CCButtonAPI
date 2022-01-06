@@ -4,8 +4,7 @@ local buttonDict = {}
 local sizeX, sizeY = 0, 0
 local rows, cols = {}, {}
 
-function initMonitor(textScale)
-    local mon = peripheral.find("monitor")
+function initMonitor(mon, textScale)
     if mon == nil then
         print("Monitor not found :(")
         shell.exit()
@@ -13,7 +12,7 @@ function initMonitor(textScale)
         mon.setBackgroundColor(colors.black)
         mon.setTextScale(textScale)
         mon.clear()
-        sizeX, sizeY = mon.getSize() -- 4x3 = 39w 19h || 2x2 = 18w 12h
+        sizeX, sizeY = mon.getSize() -- 4x3 = 39w 19h || 2x2 = 18w 12h @textScale=1
         buttonWidth = (sizeX - 5) / 2
         
         for i=0,10 do
@@ -23,7 +22,6 @@ function initMonitor(textScale)
             cols[i] = 2 + (buttonWidth * i) + (3 * i)
         end
     end
-    return mon
 end
 
 function drawButton(mon, x, y, width, height, text, func, active, guiOnly)
