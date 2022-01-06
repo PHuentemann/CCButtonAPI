@@ -13,12 +13,24 @@ function initMonitor(mon, textScale)
         mon.setTextScale(textScale)
         mon.clear()
         sizeX, sizeY = mon.getSize() -- 4x3 = 39w 19h || 2x2 = 18w 12h @textScale=1
-        buttonWidth = (sizeX - 5) / 2
+        if sizeX % 2 == 0 then
+            print("even")
+            buttonWidth = (sizeX - 4) / 2 -- 36 - 4 = 32. 32 / 2 = 16
+        else
+            print("odd")
+            buttonWidth = (sizeX - 3) / 2 -- 39 - 3 = 36, 36 / 2 = 18
+        end
         for i=0,10 do
             rows[i] = 2 + (buttonHeight * i) + i -- 2+buttonHeight+1 -- 2+buttonHeight*2+2
         end
-        for i=0,10 do
-            cols[i] = 2 + (buttonWidth * i) + (3 * i)
+        if sizeX % 2 == 0 then
+            for i=0,10 do
+                cols[i] = 2 + (buttonWidth * i) + (2 * i)
+            end
+        else
+            for i=0,10 do
+                cols[i] = 2 + (buttonWidth * i) + (1 * i)
+            end
         end
     end
 end
@@ -28,8 +40,14 @@ function drawButton(mon, x, y, width, height, text, active)
     local newText = text
     local textLength = string.len(text)
     local currentBackgroundColor = mon.getBackgroundColor()
-    if (textLength % 2 == 0) then
-        newText = string.format("%s ", text)
+    if width % 2 == 0 then
+        if (textLength % 2 ~= 0) then
+            newText = string.format("%s ", text)
+        end
+    else
+        if (textLength % 2 == 0) then
+            newText = string.format("%s ", text)
+        end
     end
     textLength = string.len(newText)
     spaces = (width - textLength) / 2
