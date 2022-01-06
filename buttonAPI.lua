@@ -4,20 +4,17 @@ local buttonDict = {}
 local sizeX, sizeY = 0, 0
 local rows, cols = {}, {}
 
-function initMonitor()
+function initMonitor(textScale)
     local mon = peripheral.find("monitor")
     if mon == nil then
         print("Monitor not found :(")
         shell.exit()
     else
         mon.setBackgroundColor(colors.black)
-        mon.setTextScale(1)
+        mon.setTextScale(textScale)
         mon.clear()
         sizeX, sizeY = mon.getSize() -- 4x3 = 39w 19h || 2x2 = 18w 12h
         buttonWidth = (sizeX - 5) / 2
-        if sizeX < 30 then
-            mon.setTextScale(0.5) 
-        end
         
         for i=0,10 do
             rows[i] = 2 + (buttonHeight * i) + i -- 2+buttonHeight+1 -- 2+buttonHeight*2+2
