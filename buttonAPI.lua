@@ -59,6 +59,16 @@ function drawButton(mon, x, y, width, height, text, func, active)
     func(active)
 end
 
+function toggleButton(mon, button, state)
+    local tempDict = buttonDict
+    for name, values in pairs(tempDict) do
+        local xStart, xEnd, yStart, yEnd, width, height, func, active = values[1], values[2], values[3], values[4], values[5], values[6], values[7], values[8]
+        if name == button then
+            drawButton(mon, xStart, yStart, width, height, name, func, state)
+        end
+    end
+end
+
 function handleTouchEvent(mon, x, y)
     local tempDict = buttonDict
     for name, values in pairs(tempDict) do
