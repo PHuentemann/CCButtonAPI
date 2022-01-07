@@ -1,5 +1,5 @@
 os.loadAPI("buttonAPI.lua")
-local DEBUG = false
+local DEBUG = true
 
 if DEBUG then print("<Program> Start") end
 
@@ -178,20 +178,21 @@ while true do
             --event, side, channel, replyChannel, message, distance = eventData
             local channel, replyChannel, message, distance = eventData[3], eventData[4], tostring(eventData[5]), eventData[6]
             if channel == recvChannel then
-                if DEBUG then print("Received message: " .. message .." channel: " .. channel .. " distance: " .. distance) end
-                local splitMsg = {}
-                for str in string.gmatch(message, "%S+") do
-                    if (str ~= "on") and (str ~= "off") then
-                        table.insert(splitMsg, str)
+                if (not string.find("{", message) and not string.find("getCurrentActions", message)) then
+                    if DEBUG then print("Received message: " .. message .." channel: " .. channel) end -- .. " distance: " .. distance) end
+                    local splitMsg = {}
+                    for str in string.gmatch(message, "%S+") do
+                        if (str ~= "on") and (str ~= "off") then
+                            table.insert(splitMsg, str)
+                        end
                     end
+                    if splitMsg[#splitMsg] == "on" then
+                        buttonAPI.toggleButton(mon, splitMsg[1], true, true)
+                    elseif splitMsg[#splitMsg] == "off" then
+                        buttonAPI.toggleButton(mon, splitMsg[1], false, true)
+                    end
+                    saveSettings()
                 end
-                local buttonText = table.concat(splitMsg, " ")
-                if string.find(message, "on") then
-                    buttonAPI.toggleButton(mon, buttonText, true, true)
-                elseif string.find(message, "off") then
-                    buttonAPI.toggleButton(mon, buttonText, false, true)
-                end
-                saveSettings()
                 wireless.closeAll()
             end
         end

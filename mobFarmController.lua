@@ -135,12 +135,10 @@ if wireless ~= nil then
                 end
                 if splitMsg[#splitMsg] == "on" then
                     if DEBUG then print("Turning on the '"..name.."'") end
-                    print("Turning on the '"..name.."'")
                     toggleRedstoneColor(values[1], true)
                     values[2].value = true
                 elseif splitMsg[#splitMsg] == "off" then
                     if DEBUG then print("Turning off the '"..name.."'") end
-                    print("Turning off the '"..name.."'")
                     toggleRedstoneColor(values[1], false)
                     values[2].value = false
                 end
