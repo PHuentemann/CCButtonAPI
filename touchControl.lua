@@ -1,5 +1,5 @@
 os.loadAPI("buttonAPI.lua")
-local DEBUG = true
+local DEBUG = false
 
 if DEBUG then print("<Program> Start") end
 
@@ -182,14 +182,13 @@ while true do
                     if DEBUG then print("Received message: " .. message .." channel: " .. channel) end -- .. " distance: " .. distance) end
                     local splitMsg = {}
                     for str in string.gmatch(message, "%S+") do
-                        if (str ~= "on") and (str ~= "off") then
-                            table.insert(splitMsg, str)
-                        end
+                        table.insert(splitMsg, str)
                     end
+                    local buttonText = splitMsg[1].." "..splitMsg[2]
                     if splitMsg[#splitMsg] == "on" then
-                        buttonAPI.toggleButton(mon, splitMsg[1], true, true)
+                        buttonAPI.toggleButton(mon, buttonText, true, true)
                     elseif splitMsg[#splitMsg] == "off" then
-                        buttonAPI.toggleButton(mon, splitMsg[1], false, true)
+                        buttonAPI.toggleButton(mon, buttonText, false, true)
                     end
                     saveSettings()
                 end
