@@ -14,14 +14,12 @@ function initMonitor(mon, textScale)
         mon.setTextScale(textScale)
         mon.clear()
         sizeX, sizeY = mon.getSize() -- 4x3 = 39w 19h || 2x2 = 18w 12h @textScale=1
-        if sizeX > 30 then
+        if sizeX > 36 then
             xOffset = 3
         end
         if sizeX % 2 == 0 then
-            print("even")
             buttonWidth = (sizeX - 2) / 2 - xOffset-- 36 - 4 = 32. 32 / 2 = 16
         else
-            print("odd")
             buttonWidth = (sizeX - 1) / 2 - xOffset-- 39 - 3 = 36, 36 / 2 = 18
         end
         for i=0,10 do
