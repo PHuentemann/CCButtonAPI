@@ -10,6 +10,7 @@ local recvReplyChannel = 2
 local textScale = 0.5
 local settings = {}
 
+
 function loadSettings()
     local tempSettings = nil
     f = io.open("settings.json", "r")
@@ -86,6 +87,34 @@ function determineTextScale(mon)
     return ts
 end
 
+function getCurrentActions()
+    local tempSettings
+    if wireless then
+        wireless.open(recvReplyChannel)
+        wireless.transmit(sendChannel, recvReplyChannel, "getCurrentActions")
+        local timeout = os.startTimer(0.2)
+        local event, side, channel, replyChannel, message, distance
+        repeat
+            event, side, channel, replyChannel, message, distance = os.pullEvent()
+            if event == "timer" then
+                wireless.closeAll()
+                return nil
+            end
+        until channel == recvReplyChannel
+        wireless.closeAll()
+        if message then
+            tempSettings = textutils.unserialiseJSON(message)
+            if DEBUG then
+                for k,v in pairs(tempSettings) do
+                    print(k, v)
+                end
+            end
+        end
+    end
+    return tempSettings
+end
+
+
 local mon = peripheral.find("monitor")
 buttonAPI.initMonitor(mon, determineTextScale(mon))
 local buttonWidth = buttonAPI.getButtonWidth()
@@ -93,25 +122,23 @@ local buttonHeight = buttonAPI.getButtonHeight()
 local rows, cols = buttonAPI.getGridCoords()
 local sizeX, sizeY = buttonAPI.getSizeXY()
 
-settings = loadSettings()
+settings = getCurrentActions()
 
-local buttonList = {["Mob Slaughter"] = {sendCommand, settings["Mob Slaughter"] or false},
-                    ["Mob Masher"] = {sendCommand, settings["Mob Masher"] or false},
-                    ["Wither Spawner"] = {sendCommand, settings["Wither Spawner"] or false}}
-                    -- ["Ghast Spawner"] = {sendCommand, settings["Ghast Spawner"] or false},
-                    -- ["Blaze Spawner"] = {sendCommand, settings["Blaze Spawner"] or false},
-                    -- ["Mob Grinder"] = {sendCommand, settings["Mob Grinder"] or false}}
+if settings == nil then
+    settings = loadSettings()
+end
 
-local indX, indY = 0, 0
+local buttonList = {["Mob Slaughter"] = {sendCommand, settings["Mob Slaughter"] or false, indX = 1, indY = 0},
+                    ["Mob Masher"] = {sendCommand, settings["Mob Masher"] or false, indX = 0, indY = 0},
+                    ["Wither Skeleton"] = {sendCommand, settings["Wither Skeleton"] or false, indX = 0, indY = 1},
+                    ["Nether Star"] = {sendCommand, settings["Nether Star"] or false, indX = 0, indY = 3},
+                    ["Ether Gas"] = {sendCommand, settings["Ether Gas"] or false, indX = 1, indY = 3}}
+
+                    -- ["Wither Spawner"] = {sendCommand, settings["Wither Spawner"] or false, indX = 0, indY = 3},
+
 for buttonText, values in pairs(buttonList) do
-    buttonAPI.drawButton(mon, cols[indX], rows[indY], buttonWidth, buttonHeight, buttonText, values[2])
+    buttonAPI.drawButton(mon, cols[values.indX], rows[values.indY], buttonWidth, buttonHeight, buttonText, values[2])
     sendCommand(wireless, sendChannel, recvReplyChannel, buttonText, values[2])
-    if indX == 1 then
-        indX = 0
-        indY = indY + 1
-    else
-        indX = indX + 1
-    end
 end
 
 saveSettings()
@@ -125,13 +152,27 @@ while true do
         if event == "monitor_touch" then
             local x, y = eventData[3], eventData[4]
             local buttonText, buttonState = buttonAPI.getButtonAtPos(x, y)
-            local result = buttonList[buttonText][1](wireless, sendChannel, recvReplyChannel, buttonText, not buttonState)
-            if result then
-                buttonAPI.toggleButton(mon, buttonText, not buttonState, true)
-                -- button = buttonAPI.handleTouchEvent(mon, tonumber(x), tonumber(y))
+            if buttonText ~= nil then
+                if (buttonText == "Nether Star") or (buttonText == "Ether Gas")  then
+                    local netherOrEtherState
+                    if buttonText == "Nether Star" then
+                        netherOrEtherState = not buttonState
+                    else
+                        netherOrEtherState = buttonState
+                    end
+                    local result1 = buttonList["Nether Star"][1](wireless, sendChannel, recvReplyChannel, "Nether Star", netherOrEtherState)
+                    local result2 = buttonList["Ether Gas"][1](wireless, sendChannel, recvReplyChannel, "Ether Gas", not netherOrEtherState)
+                    buttonAPI.toggleButton(mon, "Nether Star", netherOrEtherState, true)
+                    buttonAPI.toggleButton(mon, "Ether Gas", not netherOrEtherState, true)
+                else
+                    local result = buttonList[buttonText][1](wireless, sendChannel, recvReplyChannel, buttonText, not buttonState)
+                    if result then
+                        buttonAPI.toggleButton(mon, buttonText, not buttonState, true)
+                    else
+                        if DEBUG then print("Function failed for ", buttonText) end
+                    end
+                end
                 saveSettings()
-            else
-                if DEBUG then print("Function failed for ", buttonText) end
             end
         elseif event == "modem_message" then
             --event, side, channel, replyChannel, message, distance = eventData
