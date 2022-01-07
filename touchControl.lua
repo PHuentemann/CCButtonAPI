@@ -1,5 +1,5 @@
 os.loadAPI("buttonAPI.lua")
-local DEBUG = true;
+local DEBUG = false
 
 if DEBUG then print("<Program> Start") end
 
@@ -56,7 +56,6 @@ function sendCommand(modem, sChannel, rReplyChannel, button, state)
         local event, side, channel, replyChannel, message, distance
         repeat
             event, side, channel, replyChannel, message, distance = os.pullEvent()
-            print(tostring(message), channel, distance)
             if event == "timer" then
                 channel = rReplyChannel
                 message = nil
@@ -97,10 +96,10 @@ local sizeX, sizeY = buttonAPI.getSizeXY()
 settings = loadSettings()
 
 local buttonList = {["Mob Slaughter"] = {sendCommand, settings["Mob Slaughter"] or false},
-                    ["Mob Masher"] = {sendCommand, settings["Mob Masher"] or false}}
+                    ["Mob Masher"] = {sendCommand, settings["Mob Masher"] or false},
+                    ["Wither Spawner"] = {sendCommand, settings["Wither Spawner"] or false}}
                     -- ["Ghast Spawner"] = {sendCommand, settings["Ghast Spawner"] or false},
                     -- ["Blaze Spawner"] = {sendCommand, settings["Blaze Spawner"] or false},
-                    -- ["Wither Spawner"] = {sendCommand, settings["Wither Spawner"] or false},
                     -- ["Mob Grinder"] = {sendCommand, settings["Mob Grinder"] or false}}
 
 local indX, indY = 0, 0
@@ -127,7 +126,6 @@ while true do
             local x, y = eventData[3], eventData[4]
             local buttonText, buttonState = buttonAPI.getButtonAtPos(x, y)
             local result = buttonList[buttonText][1](wireless, sendChannel, recvReplyChannel, buttonText, not buttonState)
-            if DEBUG then print(buttonText, buttonState) end
             if result then
                 buttonAPI.toggleButton(mon, buttonText, not buttonState, true)
                 -- button = buttonAPI.handleTouchEvent(mon, tonumber(x), tonumber(y))
@@ -139,7 +137,7 @@ while true do
             --event, side, channel, replyChannel, message, distance = eventData
             local channel, replyChannel, message, distance = eventData[3], eventData[4], tostring(eventData[5]), eventData[6]
             if channel == recvChannel then
-                if DEBUG then print(message, channel, distance) end
+                if DEBUG then print("Received message: " .. message .." channel: " .. channel .. " distance: " .. distance) end
                 local splitMsg = {}
                 for str in string.gmatch(message, "%S+") do
                     if (str ~= "on") and (str ~= "off") then
